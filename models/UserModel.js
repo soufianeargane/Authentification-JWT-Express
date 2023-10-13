@@ -22,14 +22,10 @@ const schema = {
         required: true,
         default: Date.now,
     },
-    // role : {
-    //     type: String,
-    //     required: true,
-    //     default: 'user',
-    //
-    // }
 }
 
 const userSchema = new mongoose.Schema(schema);
+
+// add a method to the userSchema to hide the password when returning a user
 
 module.exports = mongoose.model('User', userSchema);

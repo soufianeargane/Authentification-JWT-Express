@@ -27,10 +27,6 @@ async function register (req, res) {
     // generate a token with 600 seconds of expiration
     const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: 600});
 
-    // send email
-    sendMail(req.body, token);
-    return res.json({ token });
-
     // Create a new user
     const user = new UserModel({
         name: req.body.name,
@@ -44,10 +40,28 @@ async function register (req, res) {
 
         res.json(userObject);
     } catch (err) {
-        res.status(400).send(err);
+        return res.status(400).send(err);
     }
+
+    // send email
+    sendMail(req.body, token);
+}
+
+async function login (req, res) {
+    // get token from url
+    const token = req.params.token;
+    if(!token) return res.status(401).json({ error: 'Access denied' });
+    // verify token
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, decodedToken) => {
+        if (err) {
+            res.status(401).json({ error: 'Invalid token' });
+        } else {
+            res.json({ message: 'Token verified' });
+        }
+    });
 }
 
 module.exports = {
     register,
+    login
 }

@@ -6,8 +6,8 @@ async function sendMail(info, token){
             host: 'smtp.ethereal.email',
             port: 587,
             auth: {
-                user: 'monserrate.oberbrunner21@ethereal.email',
-                pass: 'VaNWfN9Vwwt7HD1DSw'
+                user: 'nikolas.larkin@ethereal.email',
+                pass: 'WbR5BDnvenEhW3V8CU'
             }
         });
 

@@ -17,6 +17,11 @@ const schema = {
         type: String,
         required: true,
     },
+    is_verified: {
+        type: Boolean,
+        default: false
+    }
+    ,
     date: {
         type: Date,
         required: true,

@@ -1,5 +1,6 @@
 const { validateForms } = require('../validators/validateUserForms');
 const sendMail = require('../helpers/sendMail');
+const validateToken = require('../validators/validateToken');
 
 const UserModel = require('../models/UserModel');
 const bcryptjs = require('bcryptjs');
@@ -9,11 +10,11 @@ require('dotenv').config();
 async function register (req, res) {
     // Validate the data before we make a user
     const {error} = validateForms.validateRegister(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
     // Checking if the user is already in the database
     const emailExists = await UserModel.findOne({ email: req.body.email });
-    if (emailExists) return res.status(400).send('Email already exists');
+    if (emailExists) return res.status(400).json({ error: 'Email already exists' });
 
     // Hash passwords
     const salt = await bcryptjs.genSalt(10);
@@ -24,8 +25,6 @@ async function register (req, res) {
         email: req.body.email,
         password: req.body.password,
     }
-    // generate a token with 600 seconds of expiration
-    const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: 600});
 
     // Create a new user
     const user = new UserModel({
@@ -38,30 +37,42 @@ async function register (req, res) {
         let userObject = { ...savedUser._doc };
         delete userObject.password;
 
-        res.json(userObject);
+        // generate a token with 600 seconds of expiration
+        const token = jwt.sign(userObject, process.env.TOKEN_SECRET, { expiresIn: 600});
+        sendMail(req.body, token); // send email to user
+
+        res.json({ success: 'User registered successfully, verify your email ', user: userObject });
     } catch (err) {
         return res.status(400).send(err);
     }
 
-    // send email
-    sendMail(req.body, token);
+
 }
 
-async function login (req, res) {
+async function activate (req, res) {
     // get token from url
     const token = req.params.token;
     if(!token) return res.status(401).json({ error: 'Access denied' });
     // verify token
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, decodedToken) => {
-        if (err) {
-            res.status(401).json({ error: 'Invalid token' });
-        } else {
-            res.json({ message: 'Token verified' });
-        }
-    });
+    const decoded_user = validateToken(token);
+    if(!decoded_user.success){
+        return res.status(401).json({ error: 'Access denied' })
+    }
+
+    const _id = decoded_user.data._id;
+    // update user
+    try {
+        const updatedUser = await UserModel.updateOne({ _id }, { is_verified: true });
+        console.log(updatedUser);
+        res.json({ success: 'Account activated successfully' });
+    }catch (e) {
+        console.log(e);
+        res.status(400).json({ error: 'Something went wrong' });
+    }
+
 }
 
 module.exports = {
     register,
-    login
+    activate
 }

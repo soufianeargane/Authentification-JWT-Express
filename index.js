@@ -17,6 +17,8 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(err => console.error('err is........' + err));
 
 
+
+
 // Middleware of ROUTES
 app.use('/api/auth', authRoute);
 

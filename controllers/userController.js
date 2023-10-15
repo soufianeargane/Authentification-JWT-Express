@@ -24,6 +24,7 @@ async function register (req, res) {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
+        role: req.body.role,
     }
 
     // Create a new user
@@ -31,6 +32,7 @@ async function register (req, res) {
         name: req.body.name,
         email: req.body.email,
         password: hashedPassword,
+        role: req.body.role,
     });
     try {
         const savedUser = await user.save();
@@ -63,7 +65,6 @@ async function activate (req, res) {
     // update user
     try {
         const updatedUser = await UserModel.updateOne({ _id }, { is_verified: true });
-        console.log(updatedUser);
         res.json({ success: 'Account activated successfully' });
     }catch (e) {
         console.log(e);
@@ -72,7 +73,28 @@ async function activate (req, res) {
 
 }
 
+async function login(req, res){
+    const {error} = validateForms.validateLogin(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    // Checking if the user exists
+    const user = await UserModel.findOne({ email: req.body.email });
+    if (!user) return res.status(400).json({ error: 'Email is not found' });
+
+    // Checking if the password is correct
+    const validPass = await bcryptjs.compare(req.body.password, user.password);
+    if (!validPass) return res.status(400).json({ error: 'Invalid password' });
+
+    // checking if the user is verified
+    if(!user.is_verified) return res.status(400).json({ error: 'Please verify your email' });
+
+    // Create and assign a token
+    const token = jwt.sign({ user}, process.env.TOKEN_SECRET);
+    res.header('x-auth-token', token).json({ success: 'Logged in successfully', token: token });
+}
+
 module.exports = {
     register,
-    activate
+    activate,
+    login
 }

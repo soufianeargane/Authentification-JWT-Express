@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+require('dotenv').config();
 
 async function sendMail(info, token){
     try {
@@ -6,8 +7,8 @@ async function sendMail(info, token){
             host: 'smtp.ethereal.email',
             port: 587,
             auth: {
-                user: 'nikolas.larkin@ethereal.email',
-                pass: 'WbR5BDnvenEhW3V8CU'
+                user: process.env.MAIL_EMAIL,
+                pass: process.env.MAIL_PASSWORD
             }
         });
 
@@ -17,7 +18,7 @@ async function sendMail(info, token){
             to: info.email,
             subject: 'Account activation link',
             text: `Hello ${info.name},`,
-            html: `<h1> Please click on the link to activate your account </h1>
+            html: `<h3> Please click on the link to activate your account </h3>
         <a href="http://localhost:3000/api/auth/activate/${token}">Activate your account</a>`,
         };
 

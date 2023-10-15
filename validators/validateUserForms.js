@@ -6,18 +6,20 @@ function validateRegister(body){
         name: Joi.string().min(6).required(),
         email: Joi.string().min(6).required().email(),
         password: Joi.string().min(6).required(),
+        role: Joi.string().required(),
     });
     return registerSchema.validate(body);
 }
 
-
-
-// Login Validation
-// const loginSchema = Joi.object({
-//     email: Joi.string().min(6).required().email(),
-//     password: Joi.string().min(6).required(),
-// });
+function validateLogin(body){
+    const loginSchema = Joi.object({
+        email: Joi.string().min(6).required().email(),
+        password: Joi.string().min(6).required(),
+    });
+    return loginSchema.validate(body);
+}
 
 module.exports.validateForms ={
-    validateRegister
+    validateRegister,
+    validateLogin,
 };

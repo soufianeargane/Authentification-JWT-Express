@@ -14,6 +14,7 @@ async function register (req, res) {
 
     // Checking if the user is already in the database
     const emailExists = await UserModel.findOne({ email: req.body.email });
+    console.log(emailExists);
     if (emailExists) return res.status(400).json({ error: 'Email already exists' });
 
     // Hash passwords

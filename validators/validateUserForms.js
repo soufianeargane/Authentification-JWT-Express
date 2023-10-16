@@ -19,7 +19,15 @@ function validateLogin(body){
     return loginSchema.validate(body);
 }
 
+function validateEmail(body){
+    const emailSchema = Joi.object({
+        email: Joi.string().min(6).required().email(),
+    });
+    return emailSchema.validate(body);
+}
+
 module.exports.validateForms ={
     validateRegister,
     validateLogin,
+    validateEmail
 };

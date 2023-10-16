@@ -28,7 +28,6 @@ const schema = {
         required: true,
         default: Date.now,
     },
-    // role to reference the role model, and it must be required and exist in the role collection
     role: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Role',
@@ -36,9 +35,9 @@ const schema = {
         validate: {
             validator: async function (v) {
                 const role = await Role.findById(v);
-                return role !== null;
+                return role != null;
             },
-            message: 'Role does not exist',
+            message: 'Role does not exist sadly',
         },
     }
 }

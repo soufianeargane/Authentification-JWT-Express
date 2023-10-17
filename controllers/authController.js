@@ -14,7 +14,6 @@ async function register (req, res) {
 
     // Checking if the user is already in the database
     const emailExists = await UserModel.findOne({ email: req.body.email });
-    console.log(emailExists);
     if (emailExists) return res.status(400).json({ error: 'Email already exists' });
 
     // Hash passwords
@@ -42,7 +41,15 @@ async function register (req, res) {
 
         // generate a token with 600 seconds of expiration
         const token = jwt.sign(userObject, process.env.TOKEN_SECRET, { expiresIn: 600});
-        sendMail(req.body, token); // send email to user
+        let mailOptions = {
+            from: 'AlloMedia.livraieon@media.com',
+            to: req.body.email,
+            subject: 'Account activation link',
+            text: `Hello ${req.body.name},`,
+            html: `<h3> Please click on the link to activate your account </h3>
+        <a href="http://localhost:3000/api/auth/activate/${token}">Activate your account</a>`,
+        };
+        sendMail(token, mailOptions); // send email to user
 
         res.json({ success: 'User registered successfully, verify your email ', user: userObject });
     } catch (err) {
@@ -129,7 +136,16 @@ async function forgotPassword(req, res){
 
     // generate a token with 600 seconds of expiration
     const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: 600});
-    sendMail(req.body, token); // send email to user
+    // generate a token with 600 seconds of expiration
+    let mailOptions = {
+        from: 'AlloMedia.livraieon@media.com',
+        to: req.body.email,
+        subject: 'Retrieve your password',
+        text: `Hello ${req.body.name},`,
+        html: `<h3> Please click on the link to reset your password </h3>
+        <a href="http://localhost:3000/api/auth/activate/${token}">Reset your password</a>`,
+    };
+    sendMail(token, mailOptions); // send email to user
 
     res.json({ success: 'Check your email to reset your password' });
 }

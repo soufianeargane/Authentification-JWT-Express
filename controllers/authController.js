@@ -49,7 +49,7 @@ async function register (req, res) {
             html: `<h3> Please click on the link to activate your account </h3>
         <a href="http://localhost:3000/api/auth/activate/${token}">Activate your account</a>`,
         };
-        sendMail(token, mailOptions); // send email to user
+        sendMail(mailOptions); // send email to user
 
         res.json({ success: 'User registered successfully, verify your email ', user: userObject });
     } catch (err) {
@@ -124,31 +124,66 @@ async function forgotPassword(req, res){
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     // Checking if the user exists
-    const user = await UserModel.findOne({ email: req.body.email });
+    const user = await UserModel.findOne({ email: req.body.email }).populate('role');
     if (!user) return res.status(400).json({ error: 'Email is not found' });
 
-    let payload = {
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        role: user.role,
+    try{
+        let payload = {
+            _id : user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role.name,
+        }
+
+        // generate a token with 600 seconds of expiration
+        const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: 600});
+        // generate a token with 600 seconds of expiration
+        let mailOptions = {
+            from: 'AlloMedia.livraieon@media.com',
+            to: req.body.email,
+            subject: 'Retrieve your password',
+            text: `Hello ${req.body.name},`,
+            html: `<h3> Please click on the link to reset your password </h3>
+        <a href="http://localhost:3000/api/auth/resetpassword/${token}">Reset your password</a>`,
+        };
+        sendMail(mailOptions);
+
+        res.json({ success: 'Check your email to reset your password!!!!!!' });
+    }catch (e){
+        console.log(e);
+        res.status(400).json({ error: 'Something went wrong' });
+    }
+}
+
+async function resetPassword(req, res) {
+    console.log('resetPassword');
+    const user = req.user;
+    const { error } = validateForms.validatePassword(req.body);
+
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
     }
 
-    // generate a token with 600 seconds of expiration
-    const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: 600});
-    // generate a token with 600 seconds of expiration
-    let mailOptions = {
-        from: 'AlloMedia.livraieon@media.com',
-        to: req.body.email,
-        subject: 'Retrieve your password',
-        text: `Hello ${req.body.name},`,
-        html: `<h3> Please click on the link to reset your password </h3>
-        <a href="http://localhost:3000/api/auth/activate/${token}">Reset your password</a>`,
-    };
-    sendMail(token, mailOptions); // send email to user
+    try {
+        // Generate a salt
+        const salt = await bcryptjs.genSalt(10);
 
-    res.json({ success: 'Check your email to reset your password' });
+        // Hash the new password with the generated salt
+        const hashedPassword = await bcryptjs.hash(req.body.password, salt);
+
+        // Update the user's password
+        const updatedUser = await UserModel.updateOne(
+            { _id: user._id },
+            { password: hashedPassword }
+        );
+    } catch (e) {
+        console.log(e);
+        return res.status(400).json({ error: 'Something went wrong' });
+    }
+
+    res.json({ success: 'Password reset successfully' });
 }
+
 
 
 module.exports = {
@@ -156,5 +191,6 @@ module.exports = {
     activate,
     login,
     logout,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 }

@@ -77,7 +77,7 @@ describe('Test activate function', () => {
         );
 
         // Check if res.json is called with the success message
-        expect(res.json).toHaveBeenCalledWith({ success: 'Account activated successfully' });
+        expect(res.json).toHaveBeenCalledWith({ success: 'Account activated successfully, now go to log in' });
 
     });
 

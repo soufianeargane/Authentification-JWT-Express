@@ -11,10 +11,7 @@ async function sendMail(mailOptions){
                 pass: process.env.MAIL_PASSWORD
             }
         });
-
         // define email options
-
-
         let details = await transporter.sendMail(mailOptions);
         console.log("Message sent: %s", details.messageId);
 

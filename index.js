@@ -1,5 +1,7 @@
 const authRoute = require('./routes/authRoutes');
-const userRoute = require('./routes/userRoutes');
+const clientRoutes = require('./routes/client/userRoutes');
+const deliveryRoutes = require('./routes/deliveryMan/deliveryRoues.js');
+const managerRoutes = require('./routes/manager/managerRoutes');
 
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -24,7 +26,9 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Middleware of ROUTES
 app.use('/api/auth', authRoute);
-app.use('/api/user', userRoute);
+app.use('/api/user/client', clientRoutes);
+app.use('/api/user/delivery', deliveryRoutes);
+app.use('/api/user/manager', managerRoutes);
 
 
 const port =3000;

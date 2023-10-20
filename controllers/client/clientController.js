@@ -1,4 +1,4 @@
-const validateToken = require("../validators/validateToken");
+const validateToken = require("../../validators/validateToken");
 
 function getClient(req, res){
     //get token from cookie

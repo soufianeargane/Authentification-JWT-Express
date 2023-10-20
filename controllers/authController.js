@@ -2,6 +2,8 @@ const { validateForms } = require('../validators/validateUserForms');
 const sendMail = require('../helpers/sendMail');
 const validateToken = require('../validators/validateToken');
 
+
+
 const UserModel = require('../models/UserModel');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -51,7 +53,7 @@ async function register (req, res) {
         };
         sendMail(mailOptions); // send email to user
 
-        res.json({ success: 'User registered successfully, verify your email ', user: userObject });
+        res.status(201).json({ success: 'User registered successfully, verify your email'});
     } catch (err) {
         return res.status(400).send(err);
     }
@@ -74,7 +76,7 @@ async function activate (req, res) {
     // update user
     try {
         const updatedUser = await UserModel.updateOne({ _id }, { is_verified: true });
-        res.json({ success: 'Account activated successfully' });
+        res.json({ success: 'Account activated successfully, now go to log in' });
     }catch (e) {
         console.log(e);
         res.status(400).json({ error: 'Something went wrong' });
@@ -100,6 +102,7 @@ async function login(req, res){
 
     // Create and assign a token
     const token = jwt.sign({ user}, process.env.TOKEN_SECRET);
+    console.log('login now::::::')
 
     // res.header('auth-token', token);
     res.cookie('authToken', token, { httpOnly: true });
@@ -108,7 +111,7 @@ async function login(req, res){
         case 'manager':
             return res.redirect('/api/user/manager/me');
         case 'delivery_men':
-            return res.redirect('/api/user/delivery_men/me');
+            return res.redirect('/api/user/delivery/me');
         case 'client':
             return res.redirect('/api/user/client/me');
     }

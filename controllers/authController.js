@@ -102,7 +102,6 @@ async function login(req, res){
 
     // Create and assign a token
     const token = jwt.sign({ user}, process.env.TOKEN_SECRET);
-    console.log('login now::::::')
 
     // res.header('auth-token', token);
     res.cookie('authToken', token, { httpOnly: true });

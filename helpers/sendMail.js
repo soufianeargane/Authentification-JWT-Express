@@ -4,8 +4,8 @@ require('dotenv').config();
 async function sendMail(mailOptions){
     try {
         const transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
+            host: 'sandbox.smtp.mailtrap.io',
+            port: 2525,
             auth: {
                 user: process.env.MAIL_EMAIL,
                 pass: process.env.MAIL_PASSWORD
